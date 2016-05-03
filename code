@@ -1,0 +1,26 @@
+import requests
+
+response = requests.get('https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc=188685649099')
+#print (response.status_code)
+x = str(response.content)
+
+def get_next_target(page):
+    start_link = page.find('data-label="Status"')
+    if start_link == -1:
+        return None, 0
+        
+    start_quote = page.find('Die', start_link)
+    end_quote = page.find('\n', start_quote)
+    url = page[start_quote:end_quote]
+    return url, end_quote
+    
+def print_all_links(page):
+    targets = []
+    while True:
+        url, endpos = get_next_target(page)
+        if url:
+            targets.append(url)
+            page = page[endpos:]
+        else:
+            return targets
+            break
