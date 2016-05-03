@@ -24,3 +24,5 @@ def print_all_links(page):
         else:
             return targets
             break
+            
+def status_update(tracking, status):
