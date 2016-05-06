@@ -1,8 +1,8 @@
 import requests
 
-response = requests.get('https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc=188685649099')
+#response = requests.get('https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc=340433957912522940')
 #print (response.status_code)
-x = str(response.content)
+#x = str(response.content)
 
 def get_next_target(page):
     start_link = page.find('data-label="Status"')
@@ -25,4 +25,32 @@ def print_all_links(page):
             return targets
             break
             
-def status_update(tracking, status):
+def status_update(tracking, status, country):
+    link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
+    
+    if country == 'D':
+    
+        if status >= 0 and status <=4:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            return len(status_list)
+        
+        else:
+            return None
+            
+    else:
+        if status >= 0 and status <=9:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            return len(status_list)
+        
+        else:
+            return None
