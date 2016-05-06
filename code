@@ -25,6 +25,16 @@ def print_all_links(page):
             return targets
             break
             
+def delivery_date(page):
+    start_link = page.find('Die Sendung wurde in das Zustellfahrzeug geladen')
+    if start_link == -1:
+        return None
+        
+    start_quote = page.find(',', start_link)
+    date = page[start_quote + 2:start_quote + 12]
+    return date
+    
+            
 def status_update(tracking, status, country):
     link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
     
@@ -37,10 +47,15 @@ def status_update(tracking, status, country):
             response = str(response.content)
         
             status_list = print_all_links(response)
-            return len(status_list)
+            
+            if len(status_list) == 5:
+                date = delivery_date(response)
+                return len(status_list), date
+            
+            return len(status_list), None
         
         else:
-            return None
+            return None # wird dieses else überhaupt gebraucht? viell. kann es komplett weggelassen werden
             
     else:
         if status >= 0 and status <=9:
@@ -50,6 +65,11 @@ def status_update(tracking, status, country):
             response = str(response.content)
         
             status_list = print_all_links(response)
+            
+            if len(status_list) == 10:
+                date = delivery_date(response)
+                return len(status_list), date
+                
             return len(status_list)
         
         else:
