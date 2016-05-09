@@ -1,8 +1,48 @@
-import requests
+# -*- coding: utf-8 -*-
 
-#response = requests.get('https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc=340433957912522940')
-#print (response.status_code)
-#x = str(response.content)
+import requests
+from pyxll import xl_func
+
+@xl_func("int Tracking, int Status, int Country: int")            
+def status_update(tracking, status, country):
+    link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
+    
+    if country == 1:
+    
+        if status >= 0 and status <=4:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            
+            if len(status_list) == 5:
+                date = delivery_date(response)
+                return len(status_list)#, date
+            
+            return len(status_list)#, None
+        
+        else:
+            return None 
+            
+    else:
+        if status >= 0 and status <=9:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            
+            if len(status_list) == 10:
+                date = delivery_date(response)
+                return len(status_list)#, date
+                
+            return len(status_list)#, None
+        
+        else:
+            return None
 
 def get_next_target(page):
     start_link = page.find('data-label="Status"')
@@ -34,43 +74,3 @@ def delivery_date(page):
     date = page[start_quote + 2:start_quote + 12]
     return date
     
-            
-def status_update(tracking, status, country):
-    link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
-    
-    if country == 'D':
-    
-        if status >= 0 and status <=4:
-            link = link + str(tracking)
-        
-            response = requests.get(link)
-            response = str(response.content)
-        
-            status_list = print_all_links(response)
-            
-            if len(status_list) == 5:
-                date = delivery_date(response)
-                return len(status_list), date
-            
-            return len(status_list), None
-        
-        else:
-            return None # wird dieses else überhaupt gebraucht? viell. kann es komplett weggelassen werden
-            
-    else:
-        if status >= 0 and status <=9:
-            link = link + str(tracking)
-        
-            response = requests.get(link)
-            response = str(response.content)
-        
-            status_list = print_all_links(response)
-            
-            if len(status_list) == 10:
-                date = delivery_date(response)
-                return len(status_list), date
-                
-            return len(status_list)
-        
-        else:
-            return None
