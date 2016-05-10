@@ -3,7 +3,7 @@
 import requests
 from pyxll import xl_func
 
-@xl_func("int Tracking, int Status, int Country: int")            
+@xl_func("str Tracking, int Status, int Country: int")            
 def status_update(tracking, status, country):
     link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
     
@@ -19,9 +19,9 @@ def status_update(tracking, status, country):
             
             if len(status_list) == 5:
                 date = delivery_date(response)
-                return len(status_list)#, date
+                return len(status_list), date
             
-            return len(status_list)#, None
+            return len(status_list), None
         
         else:
             return None 
@@ -37,9 +37,9 @@ def status_update(tracking, status, country):
             
             if len(status_list) == 10:
                 date = delivery_date(response)
-                return len(status_list)#, date
+                return len(status_list), date
                 
-            return len(status_list)#, None
+            return len(status_list), None
         
         else:
             return None
@@ -73,4 +73,6 @@ def delivery_date(page):
     start_quote = page.find(',', start_link)
     date = page[start_quote + 2:start_quote + 12]
     return date
+    
+
     
