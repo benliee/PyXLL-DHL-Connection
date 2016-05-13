@@ -1,10 +1,21 @@
 # -*- coding: utf-8 -*-
 
+'''
+Ziel der Funktion ist es mittels Sendungsnummer und Länderkennung den aktuellen Verlauf der Sendungen via Excel zu tracken.
+Die Variable Status dient allein dazu die Vielfachberechnung des gleichen Ergebnisses zu unterbinden. 
+'''
+
 import requests
 from pyxll import xl_func
 
 @xl_func("str Tracking, int Status, int Country: int")            
 def status_update(tracking, status, country):
+    
+    '''
+    Hauptfunktion. Steuert alle anderen Hilfsfunktionen und gibt den aktuellen Paketstatus wieder.
+    Status 5 heißt im Deutschen angekommen, während Status 10 im Ausland das Ankommen eines Pakets verzeichnet.
+    '''
+    
     link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
     
     if country == 1:
@@ -17,14 +28,14 @@ def status_update(tracking, status, country):
         
             status_list = print_all_links(response)
             
-            if len(status_list) == 5:
-                date = delivery_date(response)
-                return len(status_list), date
+            #if len(status_list) == 5:
+                #date = delivery_date(response)
+                #return len(status_list)
             
-            return len(status_list), None
+            return len(status_list)
         
         else:
-            return None 
+            return 9999 
             
     else:
         if status >= 0 and status <=9:
@@ -35,14 +46,14 @@ def status_update(tracking, status, country):
         
             status_list = print_all_links(response)
             
-            if len(status_list) == 10:
-                date = delivery_date(response)
-                return len(status_list), date
+            #if len(status_list) == 10:
+                #date = delivery_date(response)
+                #return len(status_list)
                 
-            return len(status_list), None
+            return len(status_list)
         
         else:
-            return None
+            return 9999
 
 def get_next_target(page):
     start_link = page.find('data-label="Status"')
@@ -68,11 +79,63 @@ def print_all_links(page):
 def delivery_date(page):
     start_link = page.find('Die Sendung wurde in das Zustellfahrzeug geladen')
     if start_link == -1:
-        return None
+        return 'XXX'
         
     start_quote = page.find(',', start_link)
     date = page[start_quote + 2:start_quote + 12]
+    
+    if date.find('.') == -1:
+        return 'XXX'
+    
     return date
     
-
     
+
+@xl_func("str Tracking, int Status, int Country: str")
+def excel_date(tracking, status, country):
+    
+    '''
+    Diese Funktion gibt einen String mit dem Datum aus, wenn das Paket erfolgreich am Zielort angekommen ist.
+    Sie nutzt ebenso einige der Hilfsfunktionen
+    '''
+    
+    link = 'https://nolp.dhl.de/nextt-online-public/set_identcodes.do?lang=de&idc='
+    
+    if country == 1:
+    
+        if status >= 4:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            
+            if len(status_list) >= 4:
+                date = delivery_date(response)
+                return str(date)
+            
+            return None
+        
+        else:
+            return 'XXX' 
+            
+    else:
+        if status >= 10:
+            link = link + str(tracking)
+        
+            response = requests.get(link)
+            response = str(response.content)
+        
+            status_list = print_all_links(response)
+            
+            if len(status_list) >= 10:
+                date = delivery_date(response)
+                return str(date)
+                
+            return None
+        
+        else:
+            return 'XXX'
+            
+
